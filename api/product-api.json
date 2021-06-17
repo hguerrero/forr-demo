@@ -1,0 +1,10 @@
+{
+    "id": "101",
+    "name": "scooter",
+    "description": "Small 2-wheel scooter",
+    "price": {
+        "USD": 10.50,
+        "GBP": 11.40,
+        "EUR": 8.40
+    }
+}

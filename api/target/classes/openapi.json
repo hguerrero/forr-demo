@@ -1,0 +1,30 @@
+{
+  "swagger" : "2.0",
+  "info" : {
+    "description" : "A brand new API with no content.  Go nuts!",
+    "version" : "1.0.0",
+    "title" : "New API"
+  },
+  "paths" : {
+    "/products" : {
+      "get" : {
+        "parameters" : [ ],
+        "responses" : {
+          "200" : { }
+        }
+      }
+    },
+    "/products/{productId}" : {
+      "get" : {
+        "parameters" : [ {
+          "name" : "productId",
+          "in" : "path",
+          "required" : true
+        } ],
+        "responses" : {
+          "200" : { }
+        }
+      }
+    }
+  }
+}

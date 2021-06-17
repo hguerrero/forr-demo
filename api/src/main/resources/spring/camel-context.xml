@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://camel.apache.org/schema/spring       http://camel.apache.org/schema/spring/camel-spring.xsd">
+
+    <bean id="listOfBody" class="org.apache.camel.processor.aggregate.GroupedBodyAggregationStrategy" />
+
+    <camelContext id="context-04dc17d3-9165-437c-b9aa-701b0aa1cda5" xmlns="http://camel.apache.org/schema/spring">
+
+        <dataFormats>
+            <json id="json" prettyPrint="true" library="Jackson" />
+        </dataFormats>
+
+        <!--onException>
+            <exception>java.lang.Exception</exception>
+            <handled>
+                <constant>true</constant>
+            </handled>
+            <setHeader headerName="Exchange.HTTP_RESPONSE_CODE">
+                <constant>500</constant>
+            </setHeader>
+            <setBody>
+                <simple>${exception.message}</simple>
+            </setBody>
+        </onException-->
+
+        <rest id="rest-for-openapi-document" path="/" enableCORS="true">
+            <get id="openapi.json" produces="application/json" uri="openapi.json">
+                <description>Gets the OpenAPI document for this service</description>
+                <route id="route-for-openapi-document">
+                    <setHeader id="setHeader-for-openapi-document" headerName="Exchange.CONTENT_TYPE">
+                        <constant>application/vnd.oai.openapi+json</constant>
+                    </setHeader>
+                    <setBody id="setBody-for-openapi-document">
+                        <constant>resource:classpath:openapi.json</constant>
+                    </setBody>
+                </route>
+            </get>
+        </rest>
+
+        <rest bindingMode="json" enableCORS="true" id="rest-4eb1076c-adc3-41ca-b94b-5644e0c8677c">
+            <get uri="/products">
+                <to uri="direct:rest1" />
+            </get>
+            <get uri="/products/{productId}">
+                <param name="productId" required="true" type="path" />
+                <to uri="direct:rest2" />
+            </get>
+        </rest>
+
+        <route id="route-706f73ca-838f-42d1-b843-5c27f014373c">
+            <from id="from-4a5a6c98-a459-43fc-ab02-2d729169d959" uri="direct:rest1" />
+            <setHeader headerName="CamelHttpQuery">
+                <simple>q=USD_EUR,USD_GBP&amp;compact=ultra&amp;apiKey=86a487904bb37a83b0e3</simple>
+            </setHeader>
+            <to uri="https4://free.currconv.com/api/v7/convert?bridgeEndpoint=true" />
+            <unmarshal><custom ref="json"/></unmarshal>      
+            <setHeader headerName="EUR">
+                <simple>${body[USD_EUR]}</simple>
+            </setHeader>
+            <setHeader headerName="GBP">
+                <simple>${body[USD_GBP]}</simple>
+            </setHeader>
+            <to uri="log:dump?showAll=true&amp;multiline=true"/>
+            <to uri="sql:SELECT * FROM products?dataSource=dataSource" />
+            <split streaming="true" strategyRef="listOfBody">
+                <simple>${body}</simple>
+                <log message="Got after weight:${body[weight]} GBP:${header[GBP]} EUR:${header[EUR]}" />
+                <marshal><custom ref="json"/></marshal>
+                <to uri="atlas:atlasmap-mapping.adm"/>
+                <unmarshal><custom ref="json"/></unmarshal>
+            </split>
+        </route>
+        <route id="route-c581c62a-0b1b-488a-853b-563330224bba">
+            <from id="from-be4eb617-b56f-4600-b31d-2bdec3f28021" uri="direct:rest2" />
+            <to id="to-0202d6d2-bd1f-4a53-a89a-3255796fb53c" uri="direct:501" />
+        </route>
+
+        <route id="route-for-unimplemented-operations">
+            <from id="from-for-unimplemented-operations-route" uri="direct:501" />
+            <log id="log-for-unimplemented-operations-route" message="API operation not yet implemented: ${headers.CamelHttpMethod} ${headers.CamelHttpPath}" />
+            <setHeader id="setHeader-for-unimplemented-operations-route" headerName="Exchange.HTTP_RESPONSE_CODE">
+                <constant>501</constant>
+            </setHeader>
+            <setBody id="setBody-for-unimplemented-operations-route">
+                <simple>API operation not implemented: ${headers.CamelHttpMethod} ${headers.CamelHttpPath}</simple>
+            </setBody>
+        </route>
+
+    </camelContext>
+</beans>
