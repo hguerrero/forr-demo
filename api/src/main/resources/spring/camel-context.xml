@@ -62,10 +62,10 @@
                 <simple>${body[USD_GBP]}</simple>
             </setHeader>
             <to uri="log:dump?showAll=true&amp;multiline=true"/>
-            <to uri="sql:SELECT * FROM products?dataSource=dataSource" />
+            <to uri="sql:SELECT * FROM products?dataSource=#dataSource" />
             <split streaming="true" strategyRef="listOfBody">
                 <simple>${body}</simple>
-                <log message="Got after weight:${body[weight]} GBP:${header[GBP]} EUR:${header[EUR]}" />
+                <!-- <log message="Got after weight:${body[weight]} GBP:${header[GBP]} EUR:${header[EUR]}" /> -->
                 <marshal><custom ref="json"/></marshal>
                 <to uri="atlas:atlasmap-mapping.adm"/>
                 <unmarshal><custom ref="json"/></unmarshal>

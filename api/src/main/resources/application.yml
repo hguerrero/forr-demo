@@ -5,13 +5,13 @@ camel:
   component:
     servlet:
       mapping:
-        contextPath: /*
+        contextPath: /api/*
 
 spring:
   datasource:
-    url: jdbc:mysql://localhost/inventory
-    username: mysqluser
-    password: mysqlpw
+    url: jdbc:mysql://${mysql.service.hostname:localhost}/inventory
+    username: ${mysql.service.user}
+    password: ${mysql.service.password}
     driver-class-name: com.mysql.jdbc.Driver
 
 # Binding health checks to a different port

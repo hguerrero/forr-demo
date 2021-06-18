@@ -11,3 +11,6 @@ spec:
             limits:
               cpu: "1.0"
 #              memory: 256Mi
+          envFrom:
+            - secretRef:
+                name: mysql-config
