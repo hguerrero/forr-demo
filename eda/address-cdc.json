@@ -1,0 +1,11 @@
+{
+    "id": 10,
+    "customer_id": 1001,
+    "street": "3183 Moore Avenue",
+    "city": "Euless",
+    "state": "Tx",
+    "zip": "76036",
+    "type": "SHIPPING",
+    "__op": "u",
+    "__table": "addresses"
+}

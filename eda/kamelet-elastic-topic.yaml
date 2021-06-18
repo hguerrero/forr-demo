@@ -1,0 +1,20 @@
+apiVersion: camel.apache.org/v1alpha1
+kind: KameletBinding
+metadata:
+  name: elasticsearch-index-sink
+spec:
+  source:
+    ref:
+      apiVersion: kafka.strimzi.io/v1beta2
+      kind: KafkaTopic
+      name: dbserver-mysql.inventory.orders
+  sink:
+    ref:
+      kind: Kamelet
+      apiVersion: camel.apache.org/v1alpha1
+      name: elasticsearch-index-sink
+    properties:
+      clusterName: "elasticsearch"
+      hostAddresses: "elasticsearch-es-default:9200"
+      enableSSL: false
+      indexName: "orders"
